@@ -65,8 +65,8 @@ class Methods(object):
             self.daylist.append(df.date.values[i])
             self.namelist.append(df.name.values[i])
             
-        self.daylist=list(set(self.daylist))
-        self.namelist=list(set(self.namelist))
+        self.daylist=sorted(list(set(self.daylist)))
+        self.namelist=sorted(list(set(self.namelist)))
 
         self.OrginDate.sort(key=lambda x:x.timedate.split(':'))
         
@@ -454,7 +454,7 @@ class Methods(object):
     def namediff(self,k):
         sum=0
         self.namefin={}
-        self.volume=0
+        self.volume=df.volume.values[0]
         diffday=0
         for i in range(self.finalrows):
             if i==0:
@@ -903,12 +903,12 @@ if __name__=='__main__':
     calculateall.func2()
     calculateall.spduokong2()
     calculateall.finalresult('summary statement')
-    calculateall.spduo()
-    calculateall.func1()
-    calculateall.netduo()
-    calculateall.spkong()
-    calculateall.func2()
-    calculateall.netkong()
+    #calculateall.spduo()
+    #calculateall.func1()
+    #calculateall.netduo()
+    #calculateall.spkong()
+    #calculateall.func2()
+    #calculateall.netkong()
     sql="delete from [statement(name)]"
     cursor3.execute(sql)
     out.commit()
