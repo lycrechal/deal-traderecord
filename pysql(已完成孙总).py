@@ -774,7 +774,18 @@ class Methods(object):
                 """.format('out_'+strfilename,self.OrginDate[i].timedate,self.OrginDate[i].price,final[i].duokong,final[i].amount,final[i].poundage,final[i].finalfinal,self.final2[i].amount,self.final2[i].finalfinal,self.final3[i].amount,self.final3[i].finalfinal)
             cursor3.execute(sql)
             out.commit()
-
+    def finalresult2(self,strfilename,sheetname):
+        final=[]
+        ping[strfilename]=self.fin[self.finalrows-1]
+        for i in range(self.finalrows):
+            final.append(OutPut(self.c[i],self.d[i],self.e[i],self.j[i],self.r[i],self.fin[i],self.net[i],self.pouno[i],self.supfino[i]))
+            sql="""
+                insert into [{0}] (
+                timedate,price,net,result,poundage,pureresult,duonet,duomovement,kongnet,kongmovement,name)
+                values('{1}',{2},{3},{4},{5},{6},{7},{8},{9},{10},'{11}')
+                """.format('out_'+sheetname,self.OrginDate[i].timedate,self.OrginDate[i].price,final[i].duokong,final[i].amount,final[i].poundage,final[i].finalfinal,self.final2[i].amount,self.final2[i].finalfinal,self.final3[i].amount,self.final3[i].finalfinal,strfilename)
+            cursor3.execute(sql)
+            out.commit()
     def everyone(self,k,strfilename,NOD):
         c=0
         duocount=0
@@ -922,6 +933,11 @@ if __name__=='__main__':
     sheetname=cursor2.execute("select name from sysobjects where xtype='U'").fetchall()
     for i in range(namecount[0]):
         namesheet.append(sheetname[i][0])
+    sql="""
+    delete from [out_summary(name)]
+    """
+    cursor3.execute(sql)
+    out.commit()
     for k in range(len(mylist)):
         strfilename=mylist[k]
         if(mylist[k].decode("gbk")) not in namesheet:
@@ -937,27 +953,7 @@ if __name__=='__main__':
             cursor2.execute(sql)
             outname.commit()
             
-        if ('out_'+mylist[k]).decode("gbk") not in allsheet:
-            sql="""
-            create table {0}(
-            timedate varchar(50),
-            price decimal(20, 4),
-            result decimal(20, 4),
-            net decimal(20, 4),
-            poundage decimal(20, 4),
-            pureresult decimal(20, 4),
-            duonet decimal(20, 4),
-            duomovement decimal(20, 4),
-            kongnet decimal(20, 4),
-            kongmovement decimal(20, 4)
-            )
-            """.format('out_'+strfilename)
-            cursor3.execute(sql)
-            out.commit()
-        else:
-            sql="delete from {0}".format('out_'+strfilename)
-            cursor3.execute(sql)
-            out.commit()
+
         df=g_TradeData[(g_TradeData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date','tradeplace','instrument']]
         
         calculatename.loaddata()
@@ -970,7 +966,7 @@ if __name__=='__main__':
         calculatename.spkong()
         calculatename.func2()
         calculatename.spduokong2()
-        calculatename.finalresult(strfilename)
+        calculatename.finalresult2(strfilename,'summary(name)')
         calculatename.everyone(k,strfilename,0)
         
     sql="select name,direction,offsetflag,price,volume,time,date from mock"
