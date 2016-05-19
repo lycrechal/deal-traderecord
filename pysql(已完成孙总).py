@@ -144,7 +144,7 @@ class Methods(object):
         cursor3.execute(sql)
         out.commit()
 
-    def deal(self):
+    def deal(self,last1,last2):
         a={}
         for i in range(self.finalrows):
             if self.OrginDate[i].direction == u'买'.encode("gbk"):
@@ -195,7 +195,7 @@ class Methods(object):
 
         self.pouno={}
         dageo=0
-        self.pouno[0]=abs(self.c[0])*poundage
+        self.pouno[0]=abs(self.c[0])*poundage+last2
         for i in range(1,self.finalrows):
             dageo=abs(self.c[i])*poundage
             self.pouno[i]=self.pouno[i-1]+dageo
@@ -389,12 +389,12 @@ class Methods(object):
         self.fin={}
         for i in range(self.finalrows):
             if i==0:
-                self.fin[i]=0
+                self.fin[i]=last1
             elif self.n[i]==self.n[i-1]:
-                self.fin[i]=self.r[i]+self.j[i]+sum
+                self.fin[i]=self.r[i]+self.j[i]+sum+last1
             else:
                 sum=self.r[i-1]+self.j[i-1]
-                self.fin[i]=self.r[i]+self.j[i]+sum
+                self.fin[i]=self.r[i]+self.j[i]+sum+last1
 
         self.supfino={}
         for i in range(self.finalrows):
@@ -541,7 +541,7 @@ class Methods(object):
             self.OrginDate1.append(TradeRecord('',self.OrginDate[i].direction,self.OrginDate[i].offsetflag,self.OrginDate[i].price,self.num1[i],self.OrginDate[i].timedate))
         self.OrginDate1.sort(key=lambda x:x.timedate.split(':'))
         
-    def func1(self):
+    def func1(self,last3):
         ad={}
         for i in range(self.finalrows):
             if self.OrginDate1[i].direction == u'':
@@ -626,9 +626,9 @@ class Methods(object):
         self.find={}
         for i in range(self.finalrows):
             if i==0:
-                self.find[i]=0
+                self.find[i]=last3
             else:
-                self.find[i]=self.rd[i]+self.jd[i]
+                self.find[i]=self.rd[i]+self.jd[i]+last3
         self.supfin={}
         for i in range(self.finalrows):
             self.supfin[i]=self.find[i]-self.poundageduo[i]
@@ -656,7 +656,7 @@ class Methods(object):
             self.OrginDate2.append(TradeRecord('',self.OrginDate[i].direction,self.OrginDate[i].offsetflag,self.OrginDate[i].price,self.num2[i],self.OrginDate[i].timedate))
         self.OrginDate2.sort(key=lambda x:x.timedate.split(':'))
 
-    def func2(self):
+    def func2(self,last4):
         ak={}
         for i in range(self.finalrows):
             if self.OrginDate2[i].direction == u'':
@@ -738,9 +738,9 @@ class Methods(object):
         self.fink={}
         for i in range(0,self.finalrows):
             if i==0:
-                self.fink[i]=0
+                self.fink[i]=0+last4
             else:
-                self.fink[i]=self.rk[i]+self.jk[i]
+                self.fink[i]=self.rk[i]+self.jk[i]+last4
         self.supfin={}
         for i in range(self.finalrows):
             self.supfin[i]=self.fink[i]-self.poundagekong[i]
@@ -814,7 +814,16 @@ class Methods(object):
             """.format(strfilename,ping[strfilename],c,self.maxduo,self.maxkong,max(self.fin.items(), key=lambda x: x[1])[1],min(self.fin.items(), key=lambda x: x[1])[1],len(self.daylist),self.daylist[0],self.daylist[-1],df.tradeplace.values[0],self.instrument)
             cursor3.execute(sql)
             out.commit() 
+        elif NOD==3:
 
+            sql="""
+            update [statement(name)] set
+            [pingprofit]={1},[volume]=[volume]+{2},[tradeday]=[tradeday]+{3},[end]='{4}',[tradeplace]='{5}'
+            where [date]='{0}'
+            
+            """.format(strfilename,ping[strfilename],c,len(self.daylist),self.daylist[-1],df.tradeplace.values[0])
+            cursor3.execute(sql)
+            out.commit()             
         else:
             sql="""
             insert into [statement(date)] (
@@ -840,7 +849,7 @@ class Methods(object):
             cursor3.execute(sql)
             out.commit() 
 if __name__=='__main__':
-    sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace],[instrument] from [all]"
+    sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace],[instrument] from [new]"
     g_TradeData=pd.read_sql(sql,tr)
 
     mydist=sorted(list(set(g_TradeData['date'])))
@@ -884,34 +893,36 @@ if __name__=='__main__':
             cursor2.execute(sql)
             outname.commit()
 
-            calculatedate.deal()
+            calculatedate.deal(0,0)
             calculatedate.daydiff(k)
             calculatedate.loaddata()
-            calculatedate.deal()
+            calculatedate.deal(0,0)
             calculatedate.spduo()
-            calculatedate.func1()
+            calculatedate.func1(0)
             calculatedate.spduokong()
             calculatedate.spkong()
-            calculatedate.func2()
+            calculatedate.func2(0)
             calculatedate.spduokong2()
             calculatedate.finalresult(strfilename)
             calculatedate.everyone(k,strfilename,2)
     calculateall=Methods()
     df=g_TradeData.loc[:,['name','direction','offsetflag','price','volume','time','date']]
     ping={}
-    sql="delete from {0};delete from {1};delete from {2}".format('[out_summary statement]','netduo','netkong')
-    cursor3.execute(sql)
-    out.commit()
+    last=cursor3.execute("SELECT top 1 [result],[poundage],[duomovement],[kongmovement]FROM [out].[dbo].[out_summary statement]order by timedate desc,net asc").fetchall()
+    last1=float(last[0][0])
+    last2=float(last[0][1])
+    last3=float(last[0][2])
+    last4=float(last[0][3])
     calculateall.loaddata()
     #calculateall.loadmin()
 
-    calculateall.deal()
+    calculateall.deal(last1,last2)
 
     calculateall.spduo()
-    calculateall.func1()
+    calculateall.func1(last3)
     calculateall.spduokong()
     calculateall.spkong()
-    calculateall.func2()
+    calculateall.func2(last4)
     calculateall.spduokong2()
     calculateall.finalresult('summary statement')
     #calculateall.spduo()
@@ -920,9 +931,7 @@ if __name__=='__main__':
     #calculateall.spkong()
     #calculateall.func2()
     #calculateall.netkong()
-    sql="delete from [statement(name)]"
-    cursor3.execute(sql)
-    out.commit()
+
     mylist=list(set(g_TradeData['name']))
     print mylist
     calculatename=Methods()
@@ -933,11 +942,7 @@ if __name__=='__main__':
     sheetname=cursor2.execute("select name from sysobjects where xtype='U'").fetchall()
     for i in range(namecount[0]):
         namesheet.append(sheetname[i][0])
-    sql="""
-    delete from [out_summary(name)]
-    """
-    cursor3.execute(sql)
-    out.commit()
+
     for k in range(len(mylist)):
         strfilename=mylist[k]
         if(mylist[k].decode("gbk")) not in namesheet:
@@ -948,51 +953,44 @@ if __name__=='__main__':
             """.format(strfilename)
             cursor2.execute(sql)
             outname.commit()
+            df=g_TradeData[(g_TradeData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date','tradeplace','instrument']]
+            calculatename.loaddata()
+            #calculatename.loadmin()
+            calculatename.deal(0,0)
+            calculatename.namediff(k)
+            calculatename.spduo()
+            calculatename.func1(0)
+            calculatename.spduokong()
+            calculatename.spkong()
+            calculatename.func2(0)
+            calculatename.spduokong2()
+            calculatename.finalresult2(strfilename,'summary(name)')
+            calculatename.everyone(k,strfilename,0)           
         else:
-            sql="delete from [{0}]".format(strfilename)
-            cursor2.execute(sql)
-            outname.commit()
-            
+            df=g_TradeData[(g_TradeData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date','tradeplace','instrument']]
+            sql="""
+        SELECT top 1 [result],[poundage],[duomovement],[kongmovement]
+        FROM [out].[dbo].[out_summary(name)]
+        where [name]= '{0}'
+        order by timedate desc,net asc
+        """.format(strfilename)
+            last=cursor3.execute(sql).fetchall()
+        
+            last1=float(last[0][0])
+            last2=float(last[0][1])
+            last3=float(last[0][2])
+            last4=float(last[0][3])
+            calculatename.loaddata()
+            #calculatename.loadmin()
+            calculatename.deal(last1,last2)
+            calculatename.namediff(k)
+            calculatename.spduo()
+            calculatename.func1(last3)
+            calculatename.spduokong()
+            calculatename.spkong()
+            calculatename.func2(last4)
+            calculatename.spduokong2()
+            calculatename.finalresult2(strfilename,'summary(name)')
+            calculatename.everyone(k,strfilename,3)
+        
 
-        df=g_TradeData[(g_TradeData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date','tradeplace','instrument']]
-        
-        calculatename.loaddata()
-        #calculatename.loadmin()
-        calculatename.deal()
-        calculatename.namediff(k)
-        calculatename.spduo()
-        calculatename.func1()
-        calculatename.spduokong()
-        calculatename.spkong()
-        calculatename.func2()
-        calculatename.spduokong2()
-        calculatename.finalresult2(strfilename,'summary(name)')
-        calculatename.everyone(k,strfilename,0)
-        
-    sql="select name,direction,offsetflag,price,volume,time,date from mock"
-    g_MockData=pd.read_sql(sql,tr)
-    mylist=sorted(list(set(g_MockData['name'])))
-    print mylist
-    calculatename=Methods()
-    df=g_MockData.loc[:,['name','direction','offsetflag','price','volume','time','date']]
-    ping={}
-    
-    for k in range(len(mylist)):
-        strfilename=mylist[k]
-        df=g_MockData[(g_MockData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
-        calculatename.loaddata()
-        calculatename.deal()
-        calculatename.updateeveryone(strfilename,0)
-    sql="select name,direction,offsetflag,price,volume,time,date from actual"
-    g_MockData=pd.read_sql(sql,tr)
-    mylist=sorted(list(set(g_MockData['name'])))
-    print mylist
-    calculatename=Methods()
-    df=g_MockData.loc[:,['name','direction','offsetflag','price','volume','time','date']]
-    ping={}
-    for k in range(len(mylist)):
-        strfilename=mylist[k]
-        df=g_MockData[(g_MockData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
-        calculatename.loaddata()
-        calculatename.deal()
-        calculatename.updateeveryone(strfilename,2)

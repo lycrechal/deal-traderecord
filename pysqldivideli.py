@@ -9,11 +9,11 @@ import os
 multiple=int(raw_input("Y(^o^)Yenter the times "))
 poundage=int(raw_input("Y(^o^)Yenter the poundage "))
 
-tr= pyodbc.connect('DRIVER={SQL Server};SERVER=15151385.uttcare.com,29075;DATABASE=TradeData;UID=sa;PWD=p0o9i8u7')
+tr= pyodbc.connect('DRIVER={SQL Server};SERVER=120.24.68.150,1453;DATABASE=TradeData;UID=dbUser;PWD=db+123-456')
 cursor1 = tr.cursor()
-outname=pyodbc.connect('DRIVER={SQL Server};SERVER=15151385.uttcare.com,29075;DATABASE=outname;UID=sa;PWD=p0o9i8u7')
+outname=pyodbc.connect('DRIVER={SQL Server};SERVER=120.24.68.150,1453;DATABASE=outname;UID=dbUser;PWD=db+123-456')
 cursor2=outname.cursor()
-out = pyodbc.connect('DRIVER={SQL Server};SERVER=15151385.uttcare.com,29075;DATABASE=out;UID=sa;PWD=p0o9i8u7')
+out = pyodbc.connect('DRIVER={SQL Server};SERVER=120.24.68.150,1453;DATABASE=out;UID=dbUser;PWD=db+123-456')
 cursor3 = out.cursor()
 class TradeRecord(object):
     def __init__(self,name,direction,offsetflag,price,number,timedate):
@@ -862,15 +862,15 @@ if __name__=='__main__':
         #calculatename.loadmin()
         calculatename.deal()
         calculatename.updateeveryone(strfilename,3)
-    
-    
+
+
     sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace] from [mock]"
     g_TradeData=pd.read_sql(sql,tr)
     mydist=sorted(list(set(g_TradeData['date'])))
     print mydist
     calculatedate=Methods()
     ping={}
-    sql="delete from {0};delete from {1};delete from {2};delete from {3};delete from {4};delete from {5};delete from {6};delete from {7};delete from {8}".format('[statement(mock)]','[statement(actual)]','[statement(actualsm)]','[statement(actualzt)]','[statement(mocksm)]','[statement(mockzt)]','[statement(sm)]','[statement(zt)]','[statement(month)]')
+    sql="delete from {0};delete from {1};delete from {2};delete from {3};delete from {4};delete from {5};delete from {6};delete from {7};delete from {8};delete from {9};delete from {10}".format('[statement(mock)]','[statement(actual)]','[statement(actuallh)]','[statement(actualbt)]','[statement(actualsj)]','[statement(mocklh)]','[statement(mocksj)]','[statement(mockbt)]','[statement(sj)]','[statement(lh)]','[statement(bt)]')
     cursor3.execute(sql)
     out.commit()
     for k in range(len(mydist)):
@@ -896,7 +896,7 @@ if __name__=='__main__':
         calculatedate.loaddata()
         calculatedate.deal()
         calculatedate.everyone(k,strfilename,2,'statement(actual)')
-    place=u'尚美中心'.encode("gbk")
+    place=u'龙华'.encode("gbk")
     sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace] from [actual] where [tradeplace]='{0}'".format(place)
     g_TradeData=pd.read_sql(sql,tr)
     mydist=sorted(list(set(g_TradeData['date'])))
@@ -911,8 +911,8 @@ if __name__=='__main__':
         strfilename=str(mydist[k])
         calculatedate.loaddata()
         calculatedate.deal()
-        calculatedate.everyone(k,strfilename,2,'statement(actualsm)')
-    place=u'展涛大厦'.encode("gbk")
+        calculatedate.everyone(k,strfilename,2,'statement(actuallh)')
+    place=u'沙井'.encode("gbk")
     sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace] from [actual] where [tradeplace]='{0}'".format(place)
     g_TradeData=pd.read_sql(sql,tr)
     mydist=sorted(list(set(g_TradeData['date'])))
@@ -927,9 +927,24 @@ if __name__=='__main__':
         strfilename=str(mydist[k])
         calculatedate.loaddata()
         calculatedate.deal()
-        calculatedate.everyone(k,strfilename,2,'statement(actualzt)')
+        calculatedate.everyone(k,strfilename,2,'statement(actualsj)')
+    place=u'坂田'.encode("gbk")
+    sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace] from [actual] where [tradeplace]='{0}'".format(place)
+    g_TradeData=pd.read_sql(sql,tr)
+    mydist=sorted(list(set(g_TradeData['date'])))
+    print mydist
+    calculatedate=Methods()
+    ping={}
 
-    place=u'尚美中心'.encode("gbk")
+    for k in range(len(mydist)):
+        
+
+        df=g_TradeData[(g_TradeData['date']==mydist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
+        strfilename=str(mydist[k])
+        calculatedate.loaddata()
+        calculatedate.deal()
+        calculatedate.everyone(k,strfilename,2,'statement(actualbt)')
+    place=u'龙华'.encode("gbk")
     sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace] from [mock] where [tradeplace]='{0}'".format(place)
     g_TradeData=pd.read_sql(sql,tr)
     mydist=sorted(list(set(g_TradeData['date'])))
@@ -944,8 +959,8 @@ if __name__=='__main__':
         strfilename=str(mydist[k])
         calculatedate.loaddata()
         calculatedate.deal()
-        calculatedate.everyone(k,strfilename,2,'statement(mocksm)')
-    place=u'展涛大厦'.encode("gbk")
+        calculatedate.everyone(k,strfilename,2,'statement(mocklh)')
+    place=u'沙井'.encode("gbk")
     sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace] from [mock] where [tradeplace]='{0}'".format(place)
     g_TradeData=pd.read_sql(sql,tr)
     mydist=sorted(list(set(g_TradeData['date'])))
@@ -960,10 +975,25 @@ if __name__=='__main__':
         strfilename=str(mydist[k])
         calculatedate.loaddata()
         calculatedate.deal()
-        calculatedate.everyone(k,strfilename,2,'statement(mockzt)')
+        calculatedate.everyone(k,strfilename,2,'statement(mocksj)')
+    place=u'坂田'.encode("gbk")
+    sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace] from [mock] where [tradeplace]='{0}'".format(place)
+    g_TradeData=pd.read_sql(sql,tr)
+    mydist=sorted(list(set(g_TradeData['date'])))
+    print mydist
+    calculatedate=Methods()
+    ping={}
 
+    for k in range(len(mydist)):
         
-    place=u'尚美中心'.encode("gbk")
+
+        df=g_TradeData[(g_TradeData['date']==mydist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
+        strfilename=str(mydist[k])
+        calculatedate.loaddata()
+        calculatedate.deal()
+        calculatedate.everyone(k,strfilename,2,'statement(mockbt)')
+        
+    place=u'龙华'.encode("gbk")
     sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace],[instrument] from [all] where [tradeplace]='{0}'".format(place)
     g_TradeData=pd.read_sql(sql,tr)
 
@@ -979,8 +1009,8 @@ if __name__=='__main__':
         calculatedate.loaddata()
         #calculatedate.loadmin()
         calculatedate.deal()
-        calculatedate.everyone(k,strfilename,2,'statement(sm)')
-    place=u'展涛大厦'.encode("gbk")
+        calculatedate.everyone(k,strfilename,2,'statement(lh)')
+    place=u'坂田'.encode("gbk")
     sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace],[instrument] from [all] where [tradeplace]='{0}'".format(place)
     g_TradeData=pd.read_sql(sql,tr)
 
@@ -996,8 +1026,24 @@ if __name__=='__main__':
         calculatedate.loaddata()
         #calculatedate.loadmin()
         calculatedate.deal()
-        calculatedate.everyone(k,strfilename,2,'statement(zt)')
+        calculatedate.everyone(k,strfilename,2,'statement(bt)')
+    place=u'沙井'.encode("gbk")
+    sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace],[instrument] from [all] where [tradeplace]='{0}'".format(place)
+    g_TradeData=pd.read_sql(sql,tr)
 
+    mydist=sorted(list(set(g_TradeData['date'])))
+    print mydist
+    calculatedate=Methods()
+    ping={}
+
+    for k in range(len(mydist)):
+
+        df=g_TradeData[(g_TradeData['date']==mydist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
+        strfilename=str(mydist[k])
+        calculatedate.loaddata()
+        #calculatedate.loadmin()
+        calculatedate.deal()
+        calculatedate.everyone(k,strfilename,2,'statement(sj)')
     sql="select [date],[pingprofit],[volume],[maxduo],[maxkong] from [statement(date)]"
     g_TradeData=pd.read_sql(sql,out)
     sql="select [timedate],[result] from [out_summary statement] order by [timedate]"
