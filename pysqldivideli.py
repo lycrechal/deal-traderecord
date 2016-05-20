@@ -870,7 +870,7 @@ if __name__=='__main__':
     print mydist
     calculatedate=Methods()
     ping={}
-    sql="delete from {0};delete from {1};delete from {2};delete from {3};delete from {4};delete from {5};delete from {6};delete from {7};delete from {8};delete from {9};delete from {10}".format('[statement(mock)]','[statement(actual)]','[statement(actuallh)]','[statement(actualbt)]','[statement(actualsj)]','[statement(mocklh)]','[statement(mocksj)]','[statement(mockbt)]','[statement(sj)]','[statement(lh)]','[statement(bt)]')
+    sql="delete from {0};delete from {1};delete from {2};delete from {3};delete from {4};delete from {5};delete from {6};delete from {7};delete from {8};delete from {9};delete from {10};delete from {11}".format('[statement(mock)]','[statement(actual)]','[statement(actuallh)]','[statement(actualbt)]','[statement(actualsj)]','[statement(mocklh)]','[statement(mocksj)]','[statement(mockbt)]','[statement(sj)]','[statement(lh)]','[statement(bt)]','[statement(month)]')
     cursor3.execute(sql)
     out.commit()
     for k in range(len(mydist)):
