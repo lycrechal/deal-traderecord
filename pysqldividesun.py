@@ -998,24 +998,32 @@ if __name__=='__main__':
         calculatedate.deal()
         calculatedate.everyone(k,strfilename,2,'statement(zt)')
 
-    sql="select [date],[pingprofit],[volume],[maxduo],[maxkong] from [statement(date)]"
-    g_TradeData=pd.read_sql(sql,out)
-    sql="select [timedate],[result] from [out_summary statement] order by [timedate]"
-    g_summary=pd.read_sql(sql,out)
-    x6=lambda x:x[:6]
-    mydist=sorted(list(set(g_TradeData['date'].apply(x6))))
-    print mydist
-    lloc=g_TradeData.groupby(g_TradeData['date'].apply(x6)).size()
-    monthssummary=[]
+    allsheet=["statement(date)","statement(actual)","statement(mock)","statement(actualsm)","statement(actualzt)","statement(mocksm)","statement(mockzt)","statement(sm)","statement(zt)"]
+    indexname=["all","actual","mock","actualsm","actualzt","mocksm","mockzt","sm","zt"]
+    for a in range(9):
+        sql="select [date],[pingprofit],[volume],[maxduo],[maxkong],[maxprofit],[minprofit] from [{0}]".format(allsheet[a])
+        g_TradeData=pd.read_sql(sql,out)
+        x6=lambda x:x[:6]
+        mydist=sorted(list(set(g_TradeData['date'].apply(x6))))
+        print mydist
+        lloc=g_TradeData.groupby(g_TradeData['date'].apply(x6)).size()
+        monthssummary=[]
 
-    for k in range(len(mydist)):
-        df=g_TradeData[(g_TradeData['date'].str[:6]==mydist[k])].loc[:,['pingprofit','volume','maxduo','maxkong']]
-        df2=g_summary[(g_summary['timedate'].str[:6]==mydist[k])].loc[:,['result']]
-        df2=df2['result']-df2['result'].iloc[0]
-        monthssummary=[df['pingprofit'].sum(),df['volume'].sum(),df['maxduo'].max(),df['maxkong'].max(),df2.max(),df2.min(),lloc[mydist[k]]]
-        sql="""insert into [statement(month)] (
-            month,pingprofit,volume,maxduo,maxkong,maxprofit,minprofit,tradedaycount)
-            values('{0}',{1},{2},{3},{4},{5},{6},{7})
-            """.format(mydist[k],monthssummary[0],monthssummary[1],monthssummary[2],monthssummary[3],monthssummary[4],monthssummary[5],monthssummary[6])
-        cursor3.execute(sql)
-        out.commit() 
+        for k in range(len(mydist)):
+            df=g_TradeData[(g_TradeData['date'].str[:6]==mydist[k])].loc[:,['pingprofit','volume','maxduo','maxkong','maxprofit','minprofit']]
+            maxpp=0
+            minpp=0
+            maxp=[df.maxprofit.values[0]]
+            minp=[df.minprofit.values[0]]
+            for i in range(1,lloc[mydist[k]]):
+                maxpp=df.pingprofit.values[i-1]+maxpp
+                minpp=df.pingprofit.values[i-1]+minpp
+                maxp.append(maxpp+df.maxprofit.values[i])
+                minp.append(minpp+df.minprofit.values[i])
+            monthssummary=[df['pingprofit'].sum(),df['volume'].sum(),df['maxduo'].max(),df['maxkong'].max(),max(maxp),min(minp),lloc[mydist[k]]]
+            sql="""insert into [statement(month)] (
+            month,pingprofit,volume,maxduo,maxkong,maxprofit,minprofit,tradedaycount,name)
+            values('{0}',{1},{2},{3},{4},{5},{6},{7},'{8}')
+            """.format(mydist[k],monthssummary[0],monthssummary[1],monthssummary[2],monthssummary[3],monthssummary[4],monthssummary[5],monthssummary[6],indexname[a])
+            cursor3.execute(sql)
+            out.commit() 
