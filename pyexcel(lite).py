@@ -66,6 +66,57 @@ class Methods(object):
 
         self.OrginDate.sort(key=lambda x:x.timedate.split(':'))
         self.finalrows=len(self.OrginDate)
+    def attend5min(self,k):
+        self.number={}
+        date1=self.OrginDate[0].timedate
+        kkk=0
+        ddd=1
+        ppp=1
+        volume=0
+        for i in range(self.finalrows):
+
+            date2=self.OrginDate[i].timedate
+
+            a=time.strptime(date1, "%Y%m%d %H:%M:%S")
+            b=time.strptime(date2, "%Y%m%d %H:%M:%S")
+            starttime=datetime.datetime(a[0],a[1],a[2],a[3],a[4],a[5])
+            endtime=datetime.datetime(b[0],b[1],b[2],b[3],b[4],b[5])
+            es=(endtime-starttime).seconds
+            if self.OrginDate[i].number==u'':
+                self.number[i]=0
+            else:
+                self.number[i]=self.OrginDate[i].number
+            if es==300:
+                col = get_column_letter(ppp+1)
+                newws8.cell('%s%s'%(col,k+2)).value=int(volume)
+                col = get_column_letter(ddd+1)
+                newws7.cell('%s%s'%(col,k+2)).value=float(self.fin[i]-self.fin[kkk])
+                date1=self.OrginDate[i].timedate
+                kkk=i
+                ddd=ddd+1
+                ppp=ppp+1
+                volume=0
+            else:
+                if es>300:
+                    col = get_column_letter(ppp+1) 
+                    newws8.cell('%s%s'%(col,k+2)).value=int(volume)
+                    col = get_column_letter(ddd+1)
+                    newws7.cell('%s%s'%(col,k+2)).value=float(self.fin[i]-self.fin[kkk])
+
+                    date1=self.OrginDate[i].timedate
+                    kkk=i
+                    ddd=ddd+1
+                    ppp=ppp+1
+                    volume=0
+                else:
+                    volume=volume+self.number[i]
+
+
+
+        col = get_column_letter(ddd+1)
+        newws7.cell('%s%s'%(col,k+2)).value=float(self.fin[self.finalrows-1]-self.fin[kkk])
+        col = get_column_letter(ppp+1) 
+        newws8.cell('%s%s'%(col,k+2)).value=int(volume)
     def attendtime(self,k):
         self.number={}
         date1=self.OrginDate[0].timedate
@@ -744,13 +795,106 @@ class Methods(object):
                 if i<self.finalrows-1:
                     time1=self.OrginDate[i+1].timedate
                 else:
-                    time1=time2                 
+                    time1=time2      
+    def danbian(self):
+        a={}
+        for i in range(self.finalrows):
+            if self.OrginDate[i].direction == u'买':
+                a[i]=1
+            else:
+                a[i]=-1
+
+        self.dannum1={}
+        for i in range(self.finalrows):
+            if self.n[i]==1:
+                self.dannum1[i]=self.OrginDate[i].number
+            else:
+                self.dannum1[i]=0
+
+
+        self.cdan={}
+        for i in range(self.finalrows):
+            if self.OrginDate[i].direction == u'':
+                self.cdan[i]=0
+            else:
+                self.cdan[i]=a[i]*self.dannum1[i]
+
+
+        self.ddamout={}
+        danduo=0
+        for i in range(self.finalrows):
+            danduo=danduo+self.cdan[i]
+            self.ddamout[i]=danduo
+
+
+        self.dannum2={}
+        for i in range(self.finalrows):
+            if self.n[i]==-1:
+                self.dannum2[i]=self.OrginDate[i].number
+            else:
+                self.dannum2[i]=0
+
+        self.cdankong={}
+        for i in range(self.finalrows):
+            if self.OrginDate[i].direction == u'':
+                self.cdankong[i]=0
+            else:
+                self.cdankong[i]=a[i]*self.dannum2[i]
+
+
+        self.dankongamount={}
+        dankongkong=0
+        for i in range(self.finalrows):
+            if i==0:
+                dankongkong=dankongkong+self.cdankong[i]
+                self.dankongamount[i]=dankongkong
+            else:
+                dankongkong=dankongkong+self.cdankong[i]
+                self.dankongamount[i]=dankongkong      
+    def rundanduotime(self):
+        time1=self.OrginDate[0].timedate
+        self.danduotime=0
+        for i in range(self.finalrows):
+            if self.ddamout[i]==0:
+                time2=self.OrginDate[i].timedate
+                a=time.strptime(time1, "%Y%m%d %H:%M:%S")
+                b=time.strptime(time2, "%Y%m%d %H:%M:%S")
+                starttime=datetime.datetime(a[0],a[1],a[2],a[3],a[4],a[5])
+                endtime=datetime.datetime(b[0],b[1],b[2],b[3],b[4],b[5])
+                es=(endtime-starttime).seconds
+                self.danduotime=es+self.danduotime
+                if i<self.finalrows-1:
+                    time1=self.OrginDate[i+1].timedate
+                else:
+                    time1=time2
+
+
+
+
+    def rundankongtime(self):
+        time1=self.OrginDate[0].timedate
+        self.dankongtime=0
+        for i in range(self.finalrows):
+            if self.dankongamount[i]==0:
+                time2=self.OrginDate[i].timedate
+                a=time.strptime(time1, "%Y%m%d %H:%M:%S")
+                b=time.strptime(time2, "%Y%m%d %H:%M:%S")
+                starttime=datetime.datetime(a[0],a[1],a[2],a[3],a[4],a[5])
+                endtime=datetime.datetime(b[0],b[1],b[2],b[3],b[4],b[5])
+                es=(endtime-starttime).seconds
+                self.dankongtime=es+self.dankongtime
+                if i<self.finalrows-1:
+                    time1=self.OrginDate[i+1].timedate
+                else:
+                    time1=time2
+         
     def everyone(self,k,strfilename,NOD):
         ping[strfilename]=self.fin[self.finalrows-1]
         c=0
         duocount=0
         kongcount=0
-        
+        duonet=0
+        kongnet=0
         newws2.cell('B%d'%(k+2)).value=float(ping[strfilename])
         for i in range(self.rows):
             c=c+df.volume.values[i]
@@ -764,7 +908,9 @@ class Methods(object):
                 kongcount=kongcount+self.OrginDate[i].number
         newws2.cell('F%d'%(k+2)).value=int(duocount)
         newws2.cell('G%d'%(k+2)).value=int(kongcount)
-
+        for i in range(self.finalrows):
+            duonet=duonet+self.OrginDate1[i].number
+            kongnet=kongnet+self.OrginDate2[i].number
         if NOD==0:
             newws2.cell('A%d'%(k+2)).value=strfilename
             newws2.cell('H%d'%(k+2)).value=int(len(self.daylist))
@@ -779,6 +925,10 @@ class Methods(object):
             newws2.cell('I%d'%(k+2)).value=self.alltime
             newws2.cell('K%d'%(k+2)).value=self.kongtime
             newws2.cell('L%d'%(k+2)).value=time.strptime(strfilename,"%Y%m%d")[6]+1
+            newws2.cell('M%d'%(k+2)).value=int(duonet)
+            newws2.cell('N%d'%(k+2)).value=int(kongnet)
+            newws2.cell('O%d'%(k+2)).value=int(self.danduotime)
+            newws2.cell('P%d'%(k+2)).value=int(self.dankongtime)
     def kline(self,k):
         noon=0
         for i in range(self.finalrows):
@@ -870,12 +1020,19 @@ if __name__=='__main__':
     newws2.cell('G1').value=u'成交量空头'
     newws2.cell('H1').value=u'交易人数'
     newws2.cell('I1').value=u'持仓时间'
-    newws2.cell('J1').value=u'多头持仓时间'
-    newws2.cell('K1').value=u'空头持仓时间'
-    newws2.cell('L1').value=u'周几'
+    newws2.cell('J1').value=u'净多头持仓时间'
+    newws2.cell('K1').value=u'净空头持仓时间'
+    newws2.cell('L1').value=u'星期'
+    newws2.cell('M1').value=u'净多成交量'
+    newws2.cell('N1').value=u'净空成交量'
+    newws2.cell('O1').value=u'单多持仓时间'
+    newws2.cell('P1').value=u'单空持仓时间'
+    
     ping={}
     newws5=newwb.create_sheet(u'时间段结算（盈亏）')
     newws6=newwb.create_sheet(u'时间段结算（成交量）')
+    newws7=newwb.create_sheet(u'5min时间段结算（盈亏）')
+    newws8=newwb.create_sheet(u'5min时间段结算（成交量）')
     newws5.cell('A1').value=u'日期'
     newws6.cell('A1').value=u'日期'
     newws5.cell('B1').value=u'09:15:00-09:30:00'
@@ -946,8 +1103,11 @@ if __name__=='__main__':
         calculatedate.runtime()
         calculatedate.runduotime()
         calculatedate.runkongtime()
+        calculatedate.danbian()
+        calculatedate.rundanduotime()
+        calculatedate.rundankongtime()
         calculatedate.everyone(k,strfilename,2)
-
+        calculatedate.attend5min(k)
         calculatedate.attendtime(k)
     newws3.cell('B%d'%(2*len(mydist)+2)).value=''
     newws3.cell('G%d'%(2*len(mydist)+2)).value=''
@@ -997,12 +1157,13 @@ if __name__=='__main__':
     newws2.cell('G1').value=u'成交量空头'
     newws2.cell('H1').value=u'交易天数'
     newws2.cell('I1').value=u'持仓时间'
-    newws2.cell('J1').value=u'多头持仓时间'
-    newws2.cell('K1').value=u'空头持仓时间'
+    newws2.cell('J1').value=u'净多头持仓时间'
+    newws2.cell('K1').value=u'净空头持仓时间'
     newws2.cell('L1').value=u'周一'
     newws2.cell('M1').value=u'周二'
     newws2.cell('N1').value=u'周三'
     newws2.cell('O1').value=u'周四'
+    newws2.cell('P1').value=u'周五'
     newws2.cell('P1').value=u'周五'
     newwsname=newwb.create_sheet(u'namedaydiff')
     for k in range(len(mylist)):

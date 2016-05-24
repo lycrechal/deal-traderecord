@@ -44,7 +44,7 @@ class Methods(object):
         self.rows=len(df)
         print "%d" %(self.rows)
         for i in range(self.rows):
-            self.OrginDate.append(TradeRecord('',df.direction.values[i],df.offsetflag.values[i],df.price.values[i],df.volume.values[i],df.date.values[i]+" "+df.time.values[i]))
+            self.OrginDate.append(TradeRecord('',df.direction.values[i],df.offsetflag.values[i],df.price.values[i],df.volume.values[i],df.date.values[i]+" "+str(df.time.values[i])))
             self.daylist.append(df.date.values[i])
             self.namelist.append(df.name.values[i])
         self.daylist=list(set(self.daylist))
