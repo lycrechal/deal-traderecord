@@ -15,6 +15,9 @@ outname=pyodbc.connect('DRIVER={SQL Server};SERVER=120.24.68.150,1453;DATABASE=o
 cursor2=outname.cursor()
 out = pyodbc.connect('DRIVER={SQL Server};SERVER=120.24.68.150,1453;DATABASE=out;UID=dbUser;PWD=db+123-456')
 cursor3 = out.cursor()
+sql="delete from [select]"
+cursor1.execute(sql)
+tr.commit()
 class TradeRecord(object):
     def __init__(self,name,direction,offsetflag,price,number,timedate):
         self.name=name
@@ -778,17 +781,8 @@ class Methods(object):
                 else:
                     time1=time2
     def finalresult(self,strfilename):
-        final=[]
         ping[strfilename]=self.fin[self.finalrows-1]
-        for i in range(self.finalrows):
-            final.append(OutPut(self.c[i],self.d[i],self.e[i],self.j[i],self.r[i],self.fin[i],self.net[i],self.pouno[i],self.supfino[i]))
-            sql="""
-                insert into [{0}] (
-                timedate,price,net,result,poundage,pureresult,duonet,duomovement,kongnet,kongmovement)
-                values('{1}',{2},{3},{4},{5},{6},{7},{8},{9},{10})
-                """.format('out_'+strfilename,self.OrginDate[i].timedate,self.OrginDate[i].price,final[i].duokong,final[i].amount,final[i].poundage,final[i].finalfinal,self.final2[i].amount,self.final2[i].finalfinal,self.final3[i].amount,self.final3[i].finalfinal)
-            cursor3.execute(sql)
-            out.commit()
+        
     def finalresult2(self,strfilename,sheetname):
         final=[]
         ping[strfilename]=self.fin[self.finalrows-1]
@@ -864,149 +858,71 @@ class Methods(object):
             cursor3.execute(sql)
             out.commit() 
 if __name__=='__main__':
-    sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date],[tradeplace],[instrument] from [new]"
-    g_TradeData=pd.read_sql(sql,tr)
-
-    mydist=sorted(list(set(g_TradeData['date'])))
-    print mydist
-    calculatedate=Methods()
-    ping={}
-    calount=cursor3.execute("select count(*) from sysobjects where xtype='U'").fetchone()
-    print calount[0]
-    allsheet=[]
-    sheetname=cursor3.execute("select name from sysobjects where xtype='U'").fetchall()
-    for i in range(calount[0]):
-        allsheet.append(sheetname[i][0])
-    for k in range(len(mydist)):
-        if 'out_'+mydist[k] not in allsheet:
-
-            df=g_TradeData[(g_TradeData['date']==mydist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
-            strfilename=str(mydist[k])
-            calculatedate.loaddata2()
-            #calculatedate.loadmin()
-            sql="""
-            create table {0}(
-            timedate varchar(50),
-            price decimal(20, 4),
-            result decimal(20, 4),
-            net decimal(20, 4),
-            poundage decimal(20, 4),
-            pureresult decimal(20, 4),
-            duonet decimal(20, 4),
-            duomovement decimal(20, 4),
-            kongnet decimal(20, 4),
-            kongmovement decimal(20, 4)
-            )
-            """.format('out_'+strfilename)
-            cursor3.execute(sql)
-            out.commit()
-            sql="""
-            create table [{0}](timedate varchar(50),
-            result decimal(20,4),
-            poundage decimal(20,4))
-            """.format(strfilename)
-            cursor2.execute(sql)
-            outname.commit()
-
-            calculatedate.deal(0,0)
-            calculatedate.daydiff(k)
-            calculatedate.loaddata()
-            calculatedate.deal(0,0)
-            calculatedate.spduo()
-            calculatedate.func1(0)
-            calculatedate.spduokong()
-            calculatedate.spkong()
-            calculatedate.func2(0)
-            calculatedate.spduokong2()
-            calculatedate.finalresult(strfilename)
-            calculatedate.runtime()
-            calculatedate.everyone(k,strfilename,2)
-    calculateall=Methods()
-    df=g_TradeData.loc[:,['name','direction','offsetflag','price','volume','time','date']]
-    ping={}
-    last=cursor3.execute("SELECT top 1 [result],[poundage],[duomovement],[kongmovement]FROM [out].[dbo].[out_summary statement]order by timedate desc,net asc").fetchall()
-    last1=float(last[0][0])
-    last2=float(last[0][1])
-    last3=float(last[0][2])
-    last4=float(last[0][3])
-    calculateall.loaddata()
-    #calculateall.loadmin()
-
-    calculateall.deal(last1,last2)
-
-    calculateall.spduo()
-    calculateall.func1(last3)
-    calculateall.spduokong()
-    calculateall.spkong()
-    calculateall.func2(last4)
-    calculateall.spduokong2()
-    calculateall.finalresult('summary statement')
-    #calculateall.spduo()
-    #calculateall.func1()
-    #calculateall.netduo()
-    #calculateall.spkong()
-    #calculateall.func2()
-    #calculateall.netkong()
-
-    mylist=list(set(g_TradeData['name']))
-    print mylist
-    calculatename=Methods()
-    df=g_TradeData.loc[:,['name','direction','offsetflag','price','volume','time','date','tradeplace','instrument']]
-    ping={}
-    namecount=cursor2.execute("select count(*) from sysobjects where xtype='U'").fetchone()
-    namesheet=[]
-    sheetname=cursor2.execute("select name from sysobjects where xtype='U'").fetchall()
-    for i in range(namecount[0]):
-        namesheet.append(sheetname[i][0])
-
-    for k in range(len(mylist)):
-        strfilename=mylist[k]
-        if(mylist[k].decode("gbk")) not in namesheet:
-            sql="""
-            create table {0}(timedate varchar(50),
-            result decimal(20,4),
-            volume int)
-            """.format(strfilename)
-            cursor2.execute(sql)
-            outname.commit()
-            df=g_TradeData[(g_TradeData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date','tradeplace','instrument']]
+    sql="select [date] from [statement(date)] order by date"
+    calendar=pd.read_sql(sql,out)
+    print len(calendar['date'])-20
+    up=0
+    down=19
+    for a in range(len(calendar['date'])-20):
+        sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date] from [all] where [date] between '{0}' and '{1}'".format(calendar['date'][up],calendar['date'][down])
+        g_TradeData=pd.read_sql(sql,tr)
+        mylist=list(set(g_TradeData['name']))
+        calculatename=Methods()
+        df=g_TradeData.loc[:,['name','direction','offsetflag','price','volume','time','date']]
+        ping={}
+        for k in range(len(mylist)):
+            strfilename=mylist[k]
+            df=g_TradeData[(g_TradeData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
             calculatename.loaddata()
-            #calculatename.loadmin()
             calculatename.deal(0,0)
-            calculatename.namediff(k)
-            calculatename.spduo()
-            calculatename.func1(0)
-            calculatename.spduokong()
-            calculatename.spkong()
-            calculatename.func2(0)
-            calculatename.spduokong2()
-            calculatename.finalresult2(strfilename,'summary(name)')
-            calculatename.everyone(k,strfilename,0)           
-        else:
-            df=g_TradeData[(g_TradeData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date','tradeplace','instrument']]
-            sql="""
-        SELECT top 1 [result],[poundage],[duomovement],[kongmovement]
-        FROM [out].[dbo].[out_summary(name)]
-        where [name]= '{0}'
-        order by timedate desc,net asc
-        """.format(strfilename)
-            last=cursor3.execute(sql).fetchall()
-        
-            last1=float(last[0][0])
-            last2=float(last[0][1])
-            last3=float(last[0][2])
-            last4=float(last[0][3])
-            calculatename.loaddata()
-            #calculatename.loadmin()
-            calculatename.deal(last1,last2)
-            calculatename.namediff(k)
-            calculatename.spduo()
-            calculatename.func1(last3)
-            calculatename.spduokong()
-            calculatename.spkong()
-            calculatename.func2(last4)
-            calculatename.spduokong2()
-            calculatename.finalresult2(strfilename,'summary(name)')
-            calculatename.everyone(k,strfilename,3)
-        
+            calculatename.finalresult(strfilename)
+        ping= sorted(ping.iteritems(), key=lambda d:d[1], reverse = True)
+        firsthalf=[]
+        for i in range(int(len(mylist)/2)):
+            firsthalf.append(ping[i][0])
+        print len(firsthalf)
+        print ping[0][0]
+        up=up+10
+        #down=19
+        sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date] from [all] where [date] between '{0}' and '{1}'".format(calendar['date'][up],calendar['date'][down])
+        g_TradeData=pd.read_sql(sql,tr)
+        ping={}
+        for k in range(len(firsthalf)):
+            strfilename=firsthalf[k]
+            df=g_TradeData[(g_TradeData['name']==firsthalf[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
+            if len(df)!=0:
+                calculatename.loaddata()
+                calculatename.deal(0,0)
+                calculatename.finalresult(strfilename)
+          
+        ping= sorted(ping.iteritems(), key=lambda d:d[1], reverse = True)
+        secondhalf=[]
+        for i in range(int(len(firsthalf)/2)):
+            secondhalf.append(ping[i][0])
+        print len(secondhalf)
+        print ping[0][0]
+        up=up+5
+        #down=19
+        sql="select [name],[direction],[offsetflag],[price],[volume],[time],[date] from [all] where [date] between '{0}' and '{1}'".format(calendar['date'][up],calendar['date'][down])
+        g_TradeData=pd.read_sql(sql,tr)
+        ping={}
+        for k in range(len(secondhalf)):
+            strfilename=secondhalf[k]
+            df=g_TradeData[(g_TradeData['name']==secondhalf[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
+            if len(df)!=0:
+                calculatename.loaddata()
+                calculatename.deal(0,0)
+                calculatename.finalresult(strfilename)          
 
+        ping= sorted(ping.iteritems(), key=lambda d:d[1], reverse = True)
+        thirdhalf=[]
+        for i in range(int(len(secondhalf)/2)):
+            thirdhalf.append(ping[i][0])
+        print len(thirdhalf)
+        print ping[0][0]
+        for i in range(len(thirdhalf)):
+            sql="insert into [select] select * from [all] where [name]='{0}' and [date]='{1}'".format(thirdhalf[i],calendar['date'][down+1])
+            cursor1.execute(sql)
+            tr.commit()
+        down=down+1
+        up=down-19

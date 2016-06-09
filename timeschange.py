@@ -11,7 +11,7 @@ import time
 import os
 multiple=int(raw_input("Y(^o^)Yenter the times "))
 poundage=int(raw_input("Y(^o^)Yenter the poundage "))
-
+timeschange=int(raw_input("Y(^o^)Yenter the timeschange "))
 
 
 
@@ -180,7 +180,7 @@ class Methods(object):
             if self.OrginDate[i].offsetflag== u'开仓':
                 b[i]=1
             else:
-                b[i]=-1
+               b[i]=-1
 
         b1={}
         for i in range(self.finalrows):
@@ -748,6 +748,82 @@ class Methods(object):
             newws.cell('D%d'%(i+1)).value=float(final[i].amount)
             newws.cell('E%d'%(i+1)).value=float(final[i].poundage)
             newws.cell('F%d'%(i+1)).value=float(final[i].finalfinal)
+    def ten(self,strfilename,rowplus):
+        laststep=0
+        long=0
+        short=0
+        for i in range(self.finalrows):
+            
+            if abs(self.net[i]-laststep)>=timeschange:
+                newws1.cell('A%d'%(rowplus)).value=u'一一'
+                newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                
+                newws1.cell('I%d'%(rowplus)).value=float(self.net[i]-laststep)
+                newws1.cell('E%d'%(rowplus)).value=timeschange*int(abs(self.net[i]-laststep)/timeschange)
+                newws1.cell('H%d'%(rowplus)).value=float(self.net[i])
+                if self.net[i]*laststep<0:
+                    if self.net[i]-laststep>0:
+                        newws1.cell('B%d'%(rowplus)).value=u'买'
+                        newws1.cell('C%d'%(rowplus)).value=u'平仓'
+                        short=short-timeschange*int(abs(self.net[i]-laststep)/timeschange)
+                        laststep=laststep+timeschange
+                    else:
+                        newws1.cell('B%d'%(rowplus)).value=u'卖'
+                        newws1.cell('C%d'%(rowplus)).value=u'平仓'  
+                        long=long-timeschange*int(abs(self.net[i]-laststep)/timeschange)
+                        laststep=laststep-timeschange
+                else:
+                    if self.net[i]-laststep>0:
+                    
+                        if self.net[i]<=0:
+                            newws1.cell('B%d'%(rowplus)).value=u'买'
+                            newws1.cell('C%d'%(rowplus)).value=u'平仓'
+                            short=short-timeschange*int(abs(self.net[i]-laststep)/timeschange)
+                        else:
+                            newws1.cell('B%d'%(rowplus)).value=u'买'
+                            newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                            long=long+timeschange*int(abs(self.net[i]-laststep)/timeschange)
+                        laststep=laststep+timeschange
+                    elif self.net[i]-laststep<0:
+                    
+                        if self.net[i]<0:
+                            newws1.cell('B%d'%(rowplus)).value=u'卖'
+                            newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                            short=short+timeschange*int(abs(self.net[i]-laststep)/timeschange)
+                        else:
+                            newws1.cell('B%d'%(rowplus)).value=u'卖'
+                            newws1.cell('C%d'%(rowplus)).value=u'平仓'  
+                            long=long-timeschange*int(abs(self.net[i]-laststep)/timeschange)
+                        laststep=laststep-timeschange
+                rowplus=rowplus+1
+        
+        print long
+        print short
+        newws1.cell('A%d'%(rowplus)).value=u'一一'
+        newws1.cell('B%d'%(rowplus)).value=u'卖'
+        newws1.cell('C%d'%(rowplus)).value=u'平仓' 
+        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                
+        newws1.cell('I%d'%(rowplus)).value=float(self.net[i]-laststep)
+        newws1.cell('E%d'%(rowplus)).value=long
+        newws1.cell('H%d'%(rowplus)).value=float(self.net[i])
+        rowplus=rowplus+1
+        newws1.cell('A%d'%(rowplus)).value=u'一一'
+        newws1.cell('B%d'%(rowplus)).value=u'买'
+        newws1.cell('C%d'%(rowplus)).value=u'平仓' 
+        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                
+        newws1.cell('I%d'%(rowplus)).value=float(self.net[i]-laststep)
+        newws1.cell('E%d'%(rowplus)).value=short
+        newws1.cell('H%d'%(rowplus)).value=float(self.net[i])
+        rowplus=rowplus+1
+        return rowplus
     def runtime(self):
         time1=self.OrginDate[0].timedate
         self.alltime=0
@@ -1000,7 +1076,7 @@ class Methods(object):
         newws3.cell('A%d'%(2*k+3)).value=strfilename+'B'
 if __name__=='__main__':
 
-    g_TradeData=pd.read_excel('C://Users//Administrator//result//all.xlsx', 'Sheet1', index_col=None, na_values=['NA'],converters={'date':str,'price':float})
+    g_TradeData=pd.read_excel('C://Users//Administrator//result//all.xlsx', 'Sheet2', index_col=None, na_values=['NA'],converters={'date':str,'price':float})
     g_MinData=pd.read_excel('C://Users//Administrator//result//min.xls', 'Sheet1', index_col=None, na_values=['NA'])
 
     mydist=sorted(list(set(g_TradeData['date'])))
@@ -1008,89 +1084,17 @@ if __name__=='__main__':
     calculatedate=Methods()
     newwb=Workbook()
     ew = ExcelWriter(workbook = newwb)
-    dest_filename = r'C://Users//Administrator//result//out.xlsx'
-    newws2=newwb.create_sheet(u'结算单（日期）')
-    newws3=newwb.create_sheet(u'开低高收')
-    newws2.cell('A1').value=u'日期'
-    newws2.cell('B1').value=u'平仓盈亏'
-    newws2.cell('C1').value=u'成交量'
-    newws2.cell('D1').value=u'平仓盈亏多头'
-    newws2.cell('E1').value=u'平仓盈亏空头'
-    newws2.cell('F1').value=u'成交量多头'
-    newws2.cell('G1').value=u'成交量空头'
-    newws2.cell('H1').value=u'交易人数'
-    newws2.cell('I1').value=u'持仓时间'
-    newws2.cell('J1').value=u'净多头持仓时间'
-    newws2.cell('K1').value=u'净空头持仓时间'
-    newws2.cell('L1').value=u'星期'
-    newws2.cell('M1').value=u'净多成交量'
-    newws2.cell('N1').value=u'净空成交量'
-    newws2.cell('O1').value=u'单多持仓时间'
-    newws2.cell('P1').value=u'单空持仓时间'
+    dest_filename = r'C://Users//Administrator//result//outoutout.xlsx'
     
-    ping={}
-    newws5=newwb.create_sheet(u'时间段结算（盈亏）')
-    newws6=newwb.create_sheet(u'时间段结算（成交量）')
-    newws7=newwb.create_sheet(u'5min时间段结算（盈亏）')
-    newws8=newwb.create_sheet(u'5min时间段结算（成交量）')
-    newws5.cell('A1').value=u'日期'
-    newws6.cell('A1').value=u'日期'
-    newws5.cell('B1').value=u'09:15:00-09:30:00'
-    newws6.cell('B1').value=u'09:15:00-09:30:00'
-    newws5.cell('C1').value=u'09:30:00-09:45:00'
-    newws6.cell('C1').value=u'09:30:00-09:45:00'
-    newws5.cell('D1').value=u'09:45:00-10:00:00'
-    newws6.cell('D1').value=u'09:45:00-10:00:00'
-    newws5.cell('E1').value=u'10:00:00-10:15:00'
-    newws6.cell('E1').value=u'10:00:00-10:15:00'
-    newws5.cell('F1').value=u'10:15:00-10:30:00'
-    newws6.cell('F1').value=u'10:15:00-10:30:00'
-    newws5.cell('G1').value=u'10:30:00-10:45:00'
-    newws6.cell('G1').value=u'10:30:00-10:45:00'
-    newws5.cell('H1').value=u'10:45:00-11:00:00'
-    newws6.cell('H1').value=u'10:45:00-11:00:00'
-    newws5.cell('I1').value=u'11:00:00-11:15:00'
-    newws6.cell('I1').value=u'11:00:00-11:15:00'
-    newws5.cell('J1').value=u'11:15:00-11:30:00'
-    newws6.cell('J1').value=u'11:15:00-11:30:00'
-    newws5.cell('K1').value=u'11:30:00-11:45:00'
-    newws6.cell('K1').value=u'11:30:00-11:45:00'
-    newws5.cell('L1').value=u'11:45:00-12:00:00'
-    newws6.cell('L1').value=u'11:45:00-12:00:00'
-    newws5.cell('M1').value=u'13:00:00-13:15:00'
-    newws6.cell('M1').value=u'13:00:00-13:15:00'
-    newws5.cell('N1').value=u'13:15:00-13:30:00'
-    newws6.cell('N1').value=u'13:15:00-13:30:00'
-    newws5.cell('O1').value=u'13:30:00-13:45:00'
-    newws6.cell('O1').value=u'13:30:00-13:45:00'
-    newws5.cell('P1').value=u'13:45:00-14:00:00'
-    newws6.cell('P1').value=u'13:45:00-14:00:00'
-    newws5.cell('Q1').value=u'14:00:00-14:15:00'
-    newws6.cell('Q1').value=u'14:00:00-14:15:00'
-    newws5.cell('R1').value=u'14:15:00-14:30:00'
-    newws6.cell('R1').value=u'14:15:00-14:30:00'
-    newws5.cell('S1').value=u'14:30:00-14:45:00'
-    newws6.cell('S1').value=u'14:30:00-14:45:00'
-    newws5.cell('T1').value=u'14:45:00-15:00:00'
-    newws6.cell('T1').value=u'14:45:00-15:00:00'
-    newws5.cell('U1').value=u'15:00:00-15:15:00'
-    newws6.cell('U1').value=u'15:00:00-15:15:00'
-    newws5.cell('V1').value=u'15:15:00-15:30:00'
-    newws6.cell('V1').value=u'15:15:00-15:30:00'
-    newws5.cell('W1').value=u'15:30:00-15:45:00'
-    newws6.cell('W1').value=u'15:30:00-15:45:00'
-    newws5.cell('X1').value=u'15:45:00-16:00:00'
-    newws6.cell('X1').value=u'15:45:00-16:00:00'
-    newws5.cell('Y1').value=u'16:00:00-16:15:00'
-    newws6.cell('Y1').value=u'16:00:00-16:15:00'
+    p=1
+    newws1=newwb.create_sheet(u'all')
     for k in range(len(mydist)):
         df=g_TradeData[(g_TradeData['date']==mydist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
         strfilename=str(mydist[k])
         calculatedate.loaddata()
         calculatedate.loadmin()
         #newws=newwb.create_sheet(mydist[k])
-        newws5.cell('A%d'%(k+2)).value=mydist[k]
-        newws6.cell('A%d'%(k+2)).value=mydist[k]
+
         calculatedate.deal()
         #calculatedate.finalresult(strfilename)
         calculatedate.spduo()
@@ -1098,95 +1102,18 @@ if __name__=='__main__':
         #calculatedate.spduokong()
         calculatedate.spkong()
         calculatedate.func2()
+        calculatedate.ten(strfilename,p)
+        p=calculatedate.ten(strfilename,p)
         #calculatedate.spduokong2()
-        calculatedate.kline(k)
-        calculatedate.runtime()
-        calculatedate.runduotime()
-        calculatedate.runkongtime()
-        calculatedate.danbian()
-        calculatedate.rundanduotime()
-        calculatedate.rundankongtime()
-        calculatedate.everyone(k,strfilename,2)
-        calculatedate.attend5min(k)
-        calculatedate.attendtime(k)
-    newws3.cell('B%d'%(2*len(mydist)+2)).value=''
-    newws3.cell('G%d'%(2*len(mydist)+2)).value=''
+        #calculatedate.kline(k)
+        #calculatedate.runtime()
+        #calculatedate.runduotime()
+        #calculatedate.runkongtime()
+        #calculatedate.danbian()
+        #calculatedate.rundanduotime()
+        #calculatedate.rundankongtime()
+        #calculatedate.everyone(k,strfilename,2)
+        #calculatedate.attend5min(k)
+        #calculatedate.attendtime(k)
     ew.save(filename = dest_filename)
-    calculateall=Methods()
-    newwb=load_workbook(r'C://Users//Administrator//result//out.xlsx')
-    ew = ExcelWriter(workbook = newwb)
-    dest_filename = r'C://Users//Administrator//result//out.xlsx'
-    df=g_TradeData.loc[:,['name','direction','offsetflag','price','volume','time','date']]
-    ping={}
 
-    calculateall.loaddata()
-    calculateall.loadmin()
-    newws=newwb.create_sheet(u'总表')
-    calculateall.deal()
-    calculateall.finalresult('k')
-    calculateall.spduo()
-    calculateall.func1()
-    calculateall.spduokong()
-    calculateall.spkong()
-    calculateall.func2()
-    calculateall.spduokong2()
-    newws1=newwb.create_sheet(u'净多')
-    newws2=newwb.create_sheet(u'净空')
-    calculateall.spduo()
-    calculateall.func1()
-    calculateall.netduo()
-    calculateall.spkong()
-    calculateall.func2()
-    calculateall.netkong()
-    ew.save(filename = dest_filename)
-    mylist=list(set(g_TradeData['name']))
-    print mylist
-    calculatename=Methods()
-    newwb=load_workbook(r'C://Users//Administrator//result//out.xlsx')
-    ew = ExcelWriter(workbook = newwb)
-    dest_filename = r'C://Users//Administrator//result//out.xlsx'
-    df=g_TradeData.loc[:,['name','direction','offsetflag','price','volume','time','date']]
-    ping={}
-    newws2=newwb.create_sheet(u'结算单（姓名）')
-    newws2.cell('A1').value=u'日期'
-    newws2.cell('B1').value=u'平仓盈亏'
-    newws2.cell('C1').value=u'成交量'
-    newws2.cell('D1').value=u'平仓盈亏多头'
-    newws2.cell('E1').value=u'平仓盈亏空头'
-    newws2.cell('F1').value=u'成交量多头'
-    newws2.cell('G1').value=u'成交量空头'
-    newws2.cell('H1').value=u'交易天数'
-    newws2.cell('I1').value=u'持仓时间'
-    newws2.cell('J1').value=u'净多头持仓时间'
-    newws2.cell('K1').value=u'净空头持仓时间'
-    newws2.cell('L1').value=u'周一'
-    newws2.cell('M1').value=u'周二'
-    newws2.cell('N1').value=u'周三'
-    newws2.cell('O1').value=u'周四'
-    newws2.cell('P1').value=u'周五'
-    newws2.cell('P1').value=u'周五'
-    newwsname=newwb.create_sheet(u'namedaydiff')
-    for k in range(len(mylist)):
-        df=g_TradeData[(g_TradeData['name']==mylist[k])].loc[:,['name','direction','offsetflag','price','volume','time','date']]
-        strfilename=mylist[k]
-        calculatename.loaddata()
-        calculatename.loadmin()
-        #newws=newwb.create_sheet(mylist[k])
-        newwsname.cell('A%d'%(2*k+2)).value=strfilename
-        calculatename.deal()
-        calculatename.namediff(k)
-        #calculatename.finalresult(strfilename)
-        calculatename.spduo()
-        calculatename.func1()
-        #calculatename.spduokong()
-        calculatename.spkong()
-        calculatename.func2()
-        #calculatename.spduokong2()
-        calculatename.runtime()
-        calculatename.runduotime()
-        calculatename.runkongtime()
-        calculatename.everyone(k,strfilename,0)
-
-
-
-    ew.save(filename = dest_filename)
