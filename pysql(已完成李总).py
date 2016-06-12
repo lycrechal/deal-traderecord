@@ -94,6 +94,7 @@ class Methods(object):
         ddd=1
         ppp=1
         volume=0
+        tdp=[]
         for i in range(self.finalrows):
 
             date2=self.OrginDate[i].timedate
@@ -108,14 +109,7 @@ class Methods(object):
             else:
                 self.number[i]=self.OrginDate[i].number
             if es==900:
-
-                sql="insert into [timedivide(volume)](['{0}']) values ({1})".format(strfilename,volume)
-                cursor3.execute(sql)
-                out.commit()
-                sql="insert into [timedivide(result)](['{0}']) values ({1})".format(strfilename,self.fin[i]-self.fin[kkk])
-                cursor3.execute(sql)
-                out.commit()
-
+                tdp.append(float(self.fin[i]-self.fin[kkk]))
                 date1=self.OrginDate[i].timedate
                 kkk=i
                 ddd=ddd+1
@@ -123,12 +117,7 @@ class Methods(object):
                 volume=0
             else:
                 if es>900:
-                    sql="insert into [timedivide(volume)](['{0}']) values ({1})".format(strfilename,volume)
-                    cursor3.execute(sql)
-                    out.commit()
-                    sql="insert into [timedivide(result)](['{0}']) values ({1})".format(strfilename,self.fin[i]-self.fin[kkk])
-                    cursor3.execute(sql)
-                    out.commit()
+                    tdp.append(float(self.fin[i]-self.fin[kkk]))
 
                     date1=self.OrginDate[i].timedate
                     kkk=i
@@ -137,12 +126,16 @@ class Methods(object):
                     volume=0
                 else:
                     volume=volume+self.number[i]
-        sql="insert into [timedivide(volume)](['{0}']) values ({1})".format(strfilename,volume)
+        tdp.append(float(self.fin[self.finalrows-1]-self.fin[kkk]))
+        while len(tdp)<24:
+            tdp.append(0)
+        sql="""
+                insert into [timedivide] (
+                date,[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15],[16],[17],[18],[19],[20],[21],[22],[23],[24])
+                values('{0}',{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24})
+                """.format(strfilename,tdp[0],tdp[1],tdp[2],tdp[3],tdp[4],tdp[5],tdp[6],tdp[7],tdp[8],tdp[9],tdp[10],tdp[11],tdp[12],tdp[13],tdp[14],tdp[15],tdp[16],tdp[17],tdp[18],tdp[19],tdp[20],tdp[21],tdp[22],tdp[23])
         cursor3.execute(sql)
-        out.commit()
-        sql="insert into [timedivide(result)](['{0}']) values ({1})".format(strfilename,self.fin[self.finalrows-1]-self.fin[kkk])
-        cursor3.execute(sql)
-        out.commit()
+        out.commit() 
 
     def deal(self,last1,last2):
         a={}
@@ -921,6 +914,7 @@ if __name__=='__main__':
             calculatedate.finalresult(strfilename)
             calculatedate.runtime()
             calculatedate.everyone(k,strfilename,2)
+            calculatedate.attendtime(k,strfilename)
     calculateall=Methods()
     df=g_TradeData.loc[:,['name','direction','offsetflag','price','volume','time','date']]
     ping={}
