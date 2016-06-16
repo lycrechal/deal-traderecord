@@ -752,27 +752,104 @@ class Methods(object):
         laststep=0
         long=0
         short=0
-        for i in range(self.finalrows):
+        date1=self.OrginDate[0].timedate
+        a=time.strptime(date1, "%Y%m%d %H:%M:%S")
+        starttime=datetime.datetime(a[0],a[1],a[2],a[3],a[4],a[5])
+        for i in range(1,self.finalrows):
+            date2=self.OrginDate[i].timedate
+
+
+            b=time.strptime(date2, "%Y%m%d %H:%M:%S")
             
-            if abs(self.net[i]-laststep)>=timeschange:
-                newws1.cell('A%d'%(rowplus)).value=u'一一'
-                newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
-                newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
-                newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
-                
-                newws1.cell('I%d'%(rowplus)).value=float(self.net[i]-laststep)
-                newws1.cell('E%d'%(rowplus)).value=timeschange*int(abs(self.net[i]-laststep)/timeschange)
-                newws1.cell('H%d'%(rowplus)).value=float(self.net[i])
+            endtime=datetime.datetime(b[0],b[1],b[2],b[3],b[4],b[5])
+            es=(endtime-starttime).seconds
+            if es>timeschange:
+                if self.net[i-1]*laststep<0:
+                    if laststep<0:
+                        newws1.cell('A%d'%(rowplus)).value=u'一一'
+                        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[1]
+                        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[0]
+                        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i-1].price)
+                        newws1.cell('B%d'%(rowplus)).value=u'买'
+                        newws1.cell('C%d'%(rowplus)).value=u'平仓'
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(laststep))
+                        rowplus=rowplus+1
+                        newws1.cell('A%d'%(rowplus)).value=u'一一'
+                        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[1]
+                        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[0]
+                        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i-1].price)
+                        newws1.cell('B%d'%(rowplus)).value=u'买'
+                        newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i-1]))
+                        laststep=self.net[i-1]
+                        rowplus=rowplus+1
+                    else:
+                        newws1.cell('A%d'%(rowplus)).value=u'一一'
+                        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[1]
+                        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[0]
+                        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i-1].price)
+                        newws1.cell('B%d'%(rowplus)).value=u'卖'
+                        newws1.cell('C%d'%(rowplus)).value=u'平仓' 
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(laststep))
+                        rowplus=rowplus+1
+                        newws1.cell('A%d'%(rowplus)).value=u'一一'
+                        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[1]
+                        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[0]
+                        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i-1].price)
+                        newws1.cell('B%d'%(rowplus)).value=u'卖'
+                        newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i-1]))
+                        laststep=self.net[i-1]
+                        rowplus=rowplus+1
+                else:
+                    if self.net[i-1]-laststep>0:
+                        newws1.cell('A%d'%(rowplus)).value=u'一一'
+                        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[1]
+                        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[0]
+                        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i-1].price)
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i-1]-laststep))
+                        if laststep<0:
+                            if self.net[i-1]<=0:
+                                newws1.cell('B%d'%(rowplus)).value=u'买'
+                                newws1.cell('C%d'%(rowplus)).value=u'平仓'
+                            else:
+                                newws1.cell('B%d'%(rowplus)).value=u'买'
+                                newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        else:
+                            newws1.cell('B%d'%(rowplus)).value=u'买'
+                            newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        laststep=self.net[i-1]
+                        rowplus=rowplus+1
+
+                    elif self.net[i-1]-laststep<0:
+                        newws1.cell('A%d'%(rowplus)).value=u'一一'
+                        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[1]
+                        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i-1].timedate.split(" ")[0]
+                        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i-1].price)
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i-1]-laststep))
+                        if laststep>=0:
+                            if self.net[i-1]>=0:
+                                newws1.cell('B%d'%(rowplus)).value=u'卖'
+                                newws1.cell('C%d'%(rowplus)).value=u'平仓'  
+                            else:
+                                newws1.cell('B%d'%(rowplus)).value=u'卖'
+                                newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        else:
+                            newws1.cell('B%d'%(rowplus)).value=u'卖'
+                            newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        laststep=self.net[i-1]
+                        rowplus=rowplus+1
+                starttime=starttime+datetime.timedelta(seconds=timeschange*int(es/timeschange))
+            elif es==timeschange:
                 if self.net[i]*laststep<0:
-                    if self.net[i]-laststep>0:
+                    if laststep<0:
                         newws1.cell('A%d'%(rowplus)).value=u'一一'
                         newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
                         newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
                         newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
                         newws1.cell('B%d'%(rowplus)).value=u'买'
                         newws1.cell('C%d'%(rowplus)).value=u'平仓'
-                        newws1.cell('E%d'%(rowplus)).value=timeschange*int(abs(0-laststep)/timeschange)
-                        short=short-timeschange*int(abs(0-laststep)/timeschange)
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(laststep))
                         rowplus=rowplus+1
                         newws1.cell('A%d'%(rowplus)).value=u'一一'
                         newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
@@ -780,19 +857,17 @@ class Methods(object):
                         newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
                         newws1.cell('B%d'%(rowplus)).value=u'买'
                         newws1.cell('C%d'%(rowplus)).value=u'开仓'
-                        newws1.cell('E%d'%(rowplus)).value=timeschange*int(abs(self.net[i]-0)/timeschange)
-                        long=long+timeschange*int(abs(self.net[i]-0)/timeschange)
-                        laststep=laststep+timeschange*int(abs(self.net[i]-laststep)/timeschange)
-                        
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i]))
+                        laststep=self.net[i]
+                        rowplus=rowplus+1
                     else:
                         newws1.cell('A%d'%(rowplus)).value=u'一一'
                         newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
                         newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
                         newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
                         newws1.cell('B%d'%(rowplus)).value=u'卖'
-                        newws1.cell('C%d'%(rowplus)).value=u'平仓'
-                        newws1.cell('E%d'%(rowplus)).value=timeschange*int(abs(0-laststep)/timeschange)
-                        long=long-timeschange*int(abs(0-laststep)/timeschange)
+                        newws1.cell('C%d'%(rowplus)).value=u'平仓' 
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(laststep))
                         rowplus=rowplus+1
                         newws1.cell('A%d'%(rowplus)).value=u'一一'
                         newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
@@ -800,58 +875,133 @@ class Methods(object):
                         newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
                         newws1.cell('B%d'%(rowplus)).value=u'卖'
                         newws1.cell('C%d'%(rowplus)).value=u'开仓'
-                        newws1.cell('E%d'%(rowplus)).value=timeschange*int(abs(self.net[i]-0)/timeschange)
-                        short=short+timeschange*int(abs(self.net[i]-0)/timeschange)
-                        laststep=laststep-timeschange*int(abs(self.net[i]-laststep)/timeschange)
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i]))
+                        laststep=self.net[i]
+                        rowplus=rowplus+1
                 else:
                     if self.net[i]-laststep>0:
-                    
+                        newws1.cell('A%d'%(rowplus)).value=u'一一'
+                        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i]-laststep))
+                        if laststep<0:
+                            if self.net[i]<=0:
+                                newws1.cell('B%d'%(rowplus)).value=u'买'
+                                newws1.cell('C%d'%(rowplus)).value=u'平仓'
+                            else:
+                                newws1.cell('B%d'%(rowplus)).value=u'买'
+                                newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        else:
+                            newws1.cell('B%d'%(rowplus)).value=u'买'
+                            newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        laststep=self.net[i]
+                        rowplus=rowplus+1
+
+                    elif self.net[i]-laststep<0:
+                        newws1.cell('A%d'%(rowplus)).value=u'一一'
+                        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                        newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i]-laststep))
+                        if laststep>=0:
+                            if self.net[i]>=0:
+                                newws1.cell('B%d'%(rowplus)).value=u'卖'
+                                newws1.cell('C%d'%(rowplus)).value=u'平仓'  
+                            else:
+                                newws1.cell('B%d'%(rowplus)).value=u'卖'
+                                newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        else:
+                            newws1.cell('B%d'%(rowplus)).value=u'卖'
+                            newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                        laststep=self.net[i]
+                        rowplus=rowplus+1
+                starttime=starttime+datetime.timedelta(seconds=timeschange*int(es/timeschange)) 
+        print endtime
+        print starttime
+        es=(endtime-starttime).seconds
+        print es
+        print laststep
+        if es<timeschange:
+            if self.net[i]*laststep<0:
+                if laststep<0:
+                    newws1.cell('A%d'%(rowplus)).value=u'一一'
+                    newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                    newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                    newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                    newws1.cell('B%d'%(rowplus)).value=u'买'
+                    newws1.cell('C%d'%(rowplus)).value=u'平仓'
+                    newws1.cell('E%d'%(rowplus)).value=int(abs(laststep))
+                    rowplus=rowplus+1
+                    newws1.cell('A%d'%(rowplus)).value=u'一一'
+                    newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                    newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                    newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                    newws1.cell('B%d'%(rowplus)).value=u'买'
+                    newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                    newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i]))
+                    laststep=self.net[i]
+                    rowplus=rowplus+1
+                else:
+                    newws1.cell('A%d'%(rowplus)).value=u'一一'
+                    newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                    newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                    newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                    newws1.cell('B%d'%(rowplus)).value=u'卖'
+                    newws1.cell('C%d'%(rowplus)).value=u'平仓' 
+                    newws1.cell('E%d'%(rowplus)).value=int(abs(laststep))
+                    rowplus=rowplus+1
+                    newws1.cell('A%d'%(rowplus)).value=u'一一'
+                    newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                    newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                    newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                    newws1.cell('B%d'%(rowplus)).value=u'卖'
+                    newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                    newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i]))
+                    laststep=self.net[i]
+                    rowplus=rowplus+1
+            else:
+                if self.net[i]-laststep>0:
+                    newws1.cell('A%d'%(rowplus)).value=u'一一'
+                    newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                    newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                    newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                    newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i]-laststep))
+                    if laststep<0:
                         if self.net[i]<=0:
                             newws1.cell('B%d'%(rowplus)).value=u'买'
                             newws1.cell('C%d'%(rowplus)).value=u'平仓'
-                            short=short-timeschange*int(abs(self.net[i]-laststep)/timeschange)
                         else:
                             newws1.cell('B%d'%(rowplus)).value=u'买'
                             newws1.cell('C%d'%(rowplus)).value=u'开仓'
-                            long=long+timeschange*int(abs(self.net[i]-laststep)/timeschange)
-                        laststep=laststep+timeschange*int(abs(self.net[i]-laststep)/timeschange)
-                    elif self.net[i]-laststep<0:
-                    
-                        if self.net[i]<0:
-                            newws1.cell('B%d'%(rowplus)).value=u'卖'
-                            newws1.cell('C%d'%(rowplus)).value=u'开仓'
-                            short=short+timeschange*int(abs(self.net[i]-laststep)/timeschange)
-                        else:
+                    else:
+                        newws1.cell('B%d'%(rowplus)).value=u'买'
+                        newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                    laststep=self.net[i]
+                    rowplus=rowplus+1
+
+                elif self.net[i]-laststep<0:
+                    newws1.cell('A%d'%(rowplus)).value=u'一一'
+                    newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
+                    newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
+                    newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
+                    newws1.cell('E%d'%(rowplus)).value=int(abs(self.net[i]-laststep))
+                    if laststep>=0:
+                        if self.net[i]>=0:
                             newws1.cell('B%d'%(rowplus)).value=u'卖'
                             newws1.cell('C%d'%(rowplus)).value=u'平仓'  
-                            long=long-timeschange*int(abs(self.net[i]-laststep)/timeschange)
-                        laststep=laststep-timeschange*int(abs(self.net[i]-laststep)/timeschange)
-                rowplus=rowplus+1
+                        else:
+                            newws1.cell('B%d'%(rowplus)).value=u'卖'
+                            newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                    else:
+                        newws1.cell('B%d'%(rowplus)).value=u'卖'
+                        newws1.cell('C%d'%(rowplus)).value=u'开仓'
+                    laststep=self.net[i]
+                    rowplus=rowplus+1
+            
+         
+                
         
-        print long
-        print short
-        newws1.cell('A%d'%(rowplus)).value=u'一一'
-        newws1.cell('B%d'%(rowplus)).value=u'卖'
-        newws1.cell('C%d'%(rowplus)).value=u'平仓' 
-        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
-        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
-        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
-                
-        newws1.cell('I%d'%(rowplus)).value=float(self.net[i]-laststep)
-        newws1.cell('E%d'%(rowplus)).value=long
-        newws1.cell('H%d'%(rowplus)).value=float(self.net[i])
-        rowplus=rowplus+1
-        newws1.cell('A%d'%(rowplus)).value=u'一一'
-        newws1.cell('B%d'%(rowplus)).value=u'买'
-        newws1.cell('C%d'%(rowplus)).value=u'平仓' 
-        newws1.cell('F%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[1]
-        newws1.cell('G%d'%(rowplus)).value=self.OrginDate[i].timedate.split(" ")[0]
-        newws1.cell('D%d'%(rowplus)).value=float(self.OrginDate[i].price)
-                
-        newws1.cell('I%d'%(rowplus)).value=float(self.net[i]-laststep)
-        newws1.cell('E%d'%(rowplus)).value=short
-        newws1.cell('H%d'%(rowplus)).value=float(self.net[i])
-        rowplus=rowplus+1
         return rowplus
     def runtime(self):
         time1=self.OrginDate[0].timedate
